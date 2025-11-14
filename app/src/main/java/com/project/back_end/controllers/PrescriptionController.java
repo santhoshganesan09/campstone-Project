@@ -1,7 +1,51 @@
 package com.project.back_end.controllers;
 
+import com.project.back_end.models.Prescription;
+import com.project.back_end.services.PrescriptionService;
+import com.project.back_end.services.TokenService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/prescriptions")
 public class PrescriptionController {
-    
+
+    private final PrescriptionService prescriptionService;
+    private final TokenService tokenService;
+
+    public PrescriptionController(PrescriptionService prescriptionService, TokenService tokenService) {
+        this.prescriptionService = prescriptionService;
+        this.tokenService = tokenService;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> savePrescription(
+            @RequestHeader("Authorization") String authorization,
+            @Valid @RequestBody Prescription prescription) {
+
+        // Extract token
+        String token = authorization.replace("Bearer ", "");
+
+        // Validate token
+        if (!tokenService.isValid(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid or expired token"));
+        }
+
+        // Save prescription
+        Prescription saved = prescriptionService.save(prescription);
+
+        return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "message", "Prescription saved successfully",
+                "data", saved
+        ));
+    }
+
 // 1. Set Up the Controller Class:
 //    - Annotate the class with `@RestController` to define it as a REST API controller.
 //    - Use `@RequestMapping("${api.path}prescription")` to set the base path for all prescription-related endpoints.
