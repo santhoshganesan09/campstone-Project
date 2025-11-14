@@ -1,7 +1,57 @@
 package com.project.back_end.services;
 
+import com.project.back_end.models.Prescription;
+import com.project.back_end.repo.PrescriptionRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
 public class PrescriptionService {
-    
+    private final PrescriptionRepository prescriptionRepository;
+
+    public PrescriptionService(PrescriptionRepository prescriptionRepository) {
+        this.prescriptionRepository = prescriptionRepository;
+    }
+
+    /**
+     * Save a new prescription (or update if id provided).
+     * This method sets createdAt/updatedAt fields if present (here we use createdAt only).
+     */
+    @Transactional
+    public Prescription save(Prescription prescription) {
+        if (prescription.getCreatedAt() == null) {
+            prescription.setCreatedAt(LocalDateTime.now());
+        }
+        return prescriptionRepository.save(prescription);
+    }
+
+    /**
+     * Convenience method to create from fields (used by controllers)
+     */
+    @Transactional
+    public Prescription create(Long appointmentId, String notes) {
+        Prescription p = new Prescription();
+        p.setAppointmentId(appointmentId);
+        p.setNotes(notes);
+        p.setCreatedAt(LocalDateTime.now());
+        return prescriptionRepository.save(p);
+    }
+
+    public List<Prescription> findByAppointmentId(Long appointmentId) {
+        return prescriptionRepository.findByAppointmentId(appointmentId);
+    }
+
+    public Optional<Prescription> findById(Long id) {
+        return prescriptionRepository.findById(id);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        prescriptionRepository.deleteById(id);
+    }
  // 1. **Add @Service Annotation**:
 //    - The `@Service` annotation marks this class as a Spring service component, allowing Spring's container to manage it.
 //    - This class contains the business logic related to managing prescriptions in the healthcare system.
