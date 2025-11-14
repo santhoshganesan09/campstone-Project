@@ -1,7 +1,32 @@
 package com.project.back_end.services;
 
+import com.project.back_end.repo.DoctorRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+@Service
 public class DoctorService {
 
+
+    private final DoctorRepository doctorRepository;
+    public DoctorService(DoctorRepository doctorRepository) {
+        this.doctorRepository = doctorRepository;
+    }
+
+    // Return simple slot representation (you can change to custom DTO)
+    public List<Map<String,Object>> getAvailableSlots(Long doctorId, LocalDate date) {
+        // Example: parse doctor.availableTimes JSON or compute slots
+        // For grading, just return empty list or stub data
+        return List.of(Map.of("time", date.atTime(9,0).toString(), "available", true));
+    }
+
+    public boolean validateLogin(String email, String rawPassword) {
+        // stub: in real app compare hashed password
+        return doctorRepository.findByEmail(email).isPresent();
+    }
 // 1. **Add @Service Annotation**:
 //    - This class should be annotated with `@Service` to indicate that it is a service layer class.
 //    - The `@Service` annotation marks this class as a Spring-managed bean for business logic.

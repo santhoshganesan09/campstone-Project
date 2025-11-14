@@ -1,7 +1,39 @@
 package com.project.back_end.controllers;
 
+import com.project.back_end.services.DoctorService;
+import com.project.back_end.services.TokenService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/doctors")
 public class DoctorController {
+
+    private final DoctorService doctorService;
+    private final TokenService tokenService;
+
+    public DoctorController(DoctorService doctorService, TokenService tokenService) {
+        this.doctorService = doctorService;
+        this.tokenService = tokenService;
+    }
+
+    @GetMapping("/{id}/availability")
+    public ResponseEntity<?> getAvailability(
+            @PathVariable Long id,
+            @RequestParam String date,
+            @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.replace("Bearer ", "");
+        if (!tokenService.isValid(token)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid token"));
+        }
+
+        LocalDate parsed = LocalDate.parse(date);
+        return ResponseEntity.ok(doctorService.getAvailableSlots(id, parsed));
+    }
 
 // 1. Set Up the Controller Class:
 //    - Annotate the class with `@RestController` to define it as a REST controller that serves JSON responses.

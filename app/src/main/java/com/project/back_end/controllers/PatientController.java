@@ -1,6 +1,39 @@
 package com.project.back_end.controllers;
 
+import com.project.back_end.models.Prescription;
+import com.project.back_end.services.PrescriptionService;
+import com.project.back_end.services.TokenService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
 public class PatientController {
+
+    private final PrescriptionService prescriptionService;
+    private final TokenService tokenService;
+
+    public PrescriptionController(PrescriptionService prescriptionService, TokenService tokenService) {
+        this.prescriptionService = prescriptionService;
+        this.tokenService = tokenService;
+    }
+
+    @PostMapping("/prescriptions")
+    public ResponseEntity<?> savePrescription(
+            @RequestHeader("Authorization") String authorization,
+            @RequestBody Prescription prescription) {
+
+        String token = authorization.replace("Bearer ", "");
+        if (!tokenService.isValid(token)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid token"));
+        }
+        prescriptionService.save(prescription);
+        return ResponseEntity.ok(Map.of("status", "success"));
+    }
+
+
 
 // 1. Set Up the Controller Class:
 //    - Annotate the class with `@RestController` to define it as a REST API controller for patient-related operations.
